@@ -1,56 +1,128 @@
-Project Title
-One Paragraph of project description goes here
+## Overview
 
-Getting Started
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+This project is part of a series of microservices that are in my repository in order to guide other developer about micro-services architecture in nodejs.
 
-Prerequisites
-What things you need to install the software and how to install them
+---
 
-Give examples
-Installing
-A step by step series of examples that tell you how to get a development env running
+## Requirements
 
-Say what the step will be
+*The project was developed on ubuntu 18.04 and all the instructions in this guide are based on this linux distribution.*
+Before proceeding it is needed that you have installed on your machine the following tools:
 
-Give the example
-And repeat
+1. nodejs => apt-get install nodejs
+2. npm => apt-get install npm
+3. [Docker](https://docs.docker.com/engine/install/ubuntu/)
+4. [Docker compose](https://docs.docker.com/compose/install/)
 
-until finished
-End with an example of getting some data out of the system or using it for a little demo
+**PS:** It may be needed that you have to install some npm packages that are not installed as part of the project but globally:
 
-Running the tests
-Explain how to run the automated tests for this system
+1. [enc-cmd](https://www.npmjs.com/package/env-cmd)
+2. [sequelize-cli](https://www.npmjs.com/package/sequelize-cli)
+3. You can use this [development-tool](https://github.com/webbiko/development-tool) project to help you out with database configuration.
 
-Break down into end to end tests
-Explain what these tests test and why
+---
 
-Give an example
-And coding style tests
-Explain what these tests test and why
+## Env variables
 
-Give an example
-Deployment
-Add additional notes about how to deploy this on a live system
+In order to execute this project smoothly it is necessary to create a a file called **.env-cmdrc** with the following structure:
 
-Built With
-Dropwizard - The web framework used
-Maven - Dependency Management
-ROME - Used to generate RSS Feeds
-Contributing
-Please read CONTRIBUTING.md for details on our code of conduct, and the process for submitting pull requests to us.
+```json
+{
+  "development": {
+    "NODE_ENV": "development",
+    "DATABASE_NAME": "dev",
+    "DATABASE_USER_NAME": "root",
+    "DATABASE_PASSWORD": "root",
+    "DATABASE_DIALECT": "mysql",
+    "DATABASE_LOGGING": true,
+  },
+  "stage": {
+    "NODE_ENV": "stage",
+    "DATABASE_NAME": "dev",
+    "DATABASE_USER_NAME": "root",
+    "DATABASE_PASSWORD": "root",
+    "DATABASE_DIALECT": "mysql",
+    "DATABASE_LOGGING": true,
+  },
+  "test": {
+    "NODE_ENV": "test",
+    "DATABASE_NAME": "dev",
+    "DATABASE_USER_NAME": "root",
+    "DATABASE_PASSWORD": "root",
+    "DATABASE_DIALECT": "mysql",
+    "DATABASE_LOGGING": true,
+  },
+  "production": {
+    "NODE_ENV": "production",
+    "DATABASE_NAME": "dev",
+    "DATABASE_USER_NAME": "root",
+    "DATABASE_PASSWORD": "root",
+    "DATABASE_DIALECT": "mysql",
+    "DATABASE_LOGGING": true,
+  }
+}
 
-Versioning
-We use SemVer for versioning. For the versions available, see the tags on this repository.
+```
 
-Authors
-Wagner Batista - Initial work
-See also the list of contributors who participated in this project.
+Also a file called **.sequelizerc** is required with the following structure:
 
-License
-This project is licensed under the MIT License - see the LICENSE.md file for details
+```javascript
+const path = require('path');
 
-Acknowledgments
-Hat tip to anyone whose code was used
-Inspiration
-etc
+module.exports = {
+    'config': path.resolve('./app/db/config', 'config.json'),
+    'models-path': path.resolve('./app', 'models'),
+    'seeders-path': path.resolve('./app/db', 'seeders'),
+    'migrations-path': path.resolve('./app/db', 'migrations')
+};
+```
+---
+
+## Running the project in development mode
+
+In order to run the project in development mode it is required to execute the steps below:
+
+1. Access the project development-tool/setup;
+2. Grant execution permission to setup.sh: **chmod +x setup.sh**;
+3. Execute the script: ./setup.sh. (This will build all required docker images and launch them);
+4. docker ps and you should see all docker images up and running.
+
+After the steps above it is necessary to check which ip address which database is running and to do check that out follow the steps belo:
+
+### User profile (MYSQL)
+1. As result of command **docker ps** copy the CONTAINER_ID;
+2. Execute docker inspect <CONTAINER_ID> and you should see in the end of the output just look for the tah "Networks => IPAddress" then copy it.
+3. Access the project user-management;
+4. Execute npm install;
+5. Edit the file config.json and past the IP address on host env variable;
+6. In the root folder of project user-management execute on terminal:
+	- npm run migrate:dev;
+	- npm run dev
+
+After the steps about the service should be up and running on port 3004.
+
+---
+
+## Running tests
+
+In order to run the tests it is required to execute the steps below:
+
+1. Access the project development-tool/setup;
+2. Grant execution permission to setup.sh: **chmod +x setup.sh**;
+3. Execute the script: ./setup.sh. (This will build all required docker images and launch them);
+4. docker ps and you should see all docker images up and running.
+
+After the steps above it is necessary to check which ip address which database is running and to do check that out follow the steps belo:
+
+### User profile (MYSQL)
+
+1. As result of command **docker ps** copy the CONTAINER_ID;
+2. Execute docker inspect <CONTAINER_ID> and you should see in the end of the output just look for the tah "Networks => IPAddress" then copy it.
+3. Access the project user-management;
+4. Execute npm install;
+5. Edit the file config.json and past the IP address on host env variable on test environment;
+6. In the root folder of project user-management execute on terminal:
+	- npm run migrate:test;
+	- npm run test
+
+---
